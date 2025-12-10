@@ -14,6 +14,7 @@ function Users({ user }) {
 
   const fetchUsers = async () => {
     try {
+      
       const response = await getUsers();
       setUsers(response.data);
     } catch (err) {
@@ -177,7 +178,7 @@ function Users({ user }) {
             <div className="text-center">
               <div
                 className={`text-3xl font-bold ${getRoleBadgeColor(
-                  users.role="ADMIN"
+                  (users.role = "ADMIN")
                 )} bg-clip-text text-transparent`}
               >
                 {users.filter((u) => u.role === "ADMIN").length}
@@ -189,7 +190,7 @@ function Users({ user }) {
             <div className="text-center">
               <div
                 className={`text-3xl font-bold ${getRoleBadgeColor(
-                  users.role="STAFF"
+                  (users.role = "STAFF")
                 )} bg-clip-text text-transparent`}
               >
                 {users.filter((u) => u.role === "STAFF").length}
@@ -201,7 +202,7 @@ function Users({ user }) {
             <div className="text-center">
               <div
                 className={`text-3xl font-bold ${getRoleBadgeColor(
-                  users.role="USER"
+                  (users.role = "USER")
                 )} bg-clip-text text-transparent`}
               >
                 {users.filter((u) => u.role === "USER").length}

@@ -8,7 +8,7 @@ import { useState, useEffect, useCallback } from "react";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
-import Products from "./pages/Products";
+import Products from "./pages/products/Products";
 import Users from "./pages/Users";
 import Navbar from "./components/Navbar";
 import { getCurrentUser, getMyCarts } from "./services/api";
@@ -28,6 +28,7 @@ function App() {
         try {
           const response = await getCurrentUser();
           setUser(response.data);
+          console.log(response.data);
         } catch (error) {
           localStorage.removeItem("token");
           console.log(error);

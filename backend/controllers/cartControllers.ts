@@ -1,8 +1,8 @@
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+import { Request, Response } from "express";
+import prisma from "../utils/Prisma";
 
 // Get All Carts
-const getAllCarts = async (req, res) => {
+const getAllCarts = async (req: Request, res: Response) => {
   try {
     const carts = await prisma.cart.findMany({});
     res.json({ success: true, carts });
@@ -13,8 +13,14 @@ const getAllCarts = async (req, res) => {
 };
 
 // Get cart by user id
-const getMyCart = async (req, res) => {
+const getMyCart = async (req: Request, res: Response) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        error: "Unauthorized",
+      });
+    }
     const cart = await prisma.cart.findMany({
       where: { user_id: req.user.id },
       include: {
@@ -36,22 +42,22 @@ const getMyCart = async (req, res) => {
 };
 
 // Add to cart
-const addToCart = async (req, res) => {
+const addToCart = async (req: Request, res: Response) => {
   try {
-    const userId = parseInt(req.user.id);
-    const productId = parseInt(req.body?.productId);
-
-    if (!productId) {
-      return res
-        .status(400)
-        .json({ success: false, error: "Product id is required!" });
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        error: "Unauthorized",
+      });
     }
+    const userId = req.user.id;
+    const productId = req.body?.productId;
+
     if (!userId) {
       return res
         .status(401)
         .json({ success: false, error: "Unauthorized: user id missing" });
     }
-
     const product = await prisma.product.findUnique({
       where: { id: productId },
     });
@@ -84,16 +90,21 @@ const addToCart = async (req, res) => {
 };
 
 // Delete entire cart
-const deleteCart = async (req, res) => {
+const deleteCart = async (req: Request, res: Response) => {
   try {
-    const userId = parseInt(req.user.id);
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        error: "Unauthorized",
+      });
+    }
+    const userId = req.user.id;
 
     if (!userId) {
       return res
         .status(401)
         .json({ success: false, error: "Unauthorized: user id missing" });
     }
-
     await prisma.cart.deleteMany({
       where: { user_id: userId },
     });
@@ -109,10 +120,16 @@ const deleteCart = async (req, res) => {
 };
 
 // Update cart item quantity
-const updateCartQuantity = async (req, res) => {
+const updateCartQuantity = async (req: Request, res: Response) => {
   try {
-    const userId = parseInt(req.user.id);
-    const productId = parseInt(req.body?.productId);
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        error: "Unauthorized",
+      });
+    }
+    const userId = req.user.id;
+    const productId = req.body?.productId;
     const action = req.body?.action;
 
     if (!productId) {
@@ -125,13 +142,12 @@ const updateCartQuantity = async (req, res) => {
         .status(401)
         .json({ success: false, error: "Unauthorized: user id missing" });
     }
+
     if (!action || !["increment", "decrement"].includes(action)) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          error: "Action must be 'increment' or 'decrement'",
-        });
+      return res.status(400).json({
+        success: false,
+        error: "Action must be 'increment' or 'decrement'",
+      });
     }
 
     const cartItem = await prisma.cart.findUnique({
@@ -181,10 +197,16 @@ const updateCartQuantity = async (req, res) => {
 };
 
 // Remove single item from cart
-const removeFromCart = async (req, res) => {
+const removeFromCart = async (req: Request, res: Response) => {
   try {
-    const userId = parseInt(req.user.id);
-    const productId = parseInt(req.params.productId);
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        error: "Unauthorized",
+      });
+    }
+    const userId = req.user.id;
+    const productId = req.params.productId;
 
     if (!productId) {
       return res

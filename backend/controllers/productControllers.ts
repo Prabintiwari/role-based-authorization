@@ -1,8 +1,10 @@
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+import { Request, Response } from "express";
+import { deleteFile } from "../utils/fileServices";
+import { fileUpload } from "../utils/fileServices";
+import prisma from "../utils/Prisma";
 
 // Get All Products
-const getAllProducts = async (req, res) => {
+const getAllProducts = async (req: Request, res: Response) => {
   try {
     const products = await prisma.product.findMany({
       include: {
@@ -29,9 +31,9 @@ const getAllProducts = async (req, res) => {
 };
 
 // Get Single Product
-const getProductById = async (req, res) => {
+const getProductById = async (req: Request, res: Response) => {
   try {
-    const productId = parseInt(req.params.id);
+    const productId = req.params.id;
 
     const product = await prisma.product.findUnique({
       where: { id: productId },
@@ -65,15 +67,19 @@ const getProductById = async (req, res) => {
 };
 
 // Create Product
-const createProduct = async (req, res) => {
+const createProduct = async (req: Request, res: Response) => {
   try {
     const { title, description, price, quantity, category } = req.body;
-
-    if (!title || !price) {
+    const file = req.file;
+    let filePath = undefined;
+    if (!file) {
       return res.status(400).json({
         success: false,
-        error: "Title and price are required",
+        error: "No file uploaded",
       });
+    }
+    if (file) {
+      filePath = fileUpload(file,"product");
     }
 
     const product = await prisma.product.create({
@@ -83,6 +89,7 @@ const createProduct = async (req, res) => {
         price: parseFloat(price),
         quantity: quantity ? parseInt(quantity) : 0,
         category,
+        image: filePath,
         user: {
           connect: { id: req.user?.id },
         },
@@ -111,12 +118,20 @@ const createProduct = async (req, res) => {
 };
 
 // Update Product
-const updateProduct = async (req, res) => {
+const updateProduct = async (req: Request, res: Response) => {
   try {
-    const productId = parseInt(req.params.id);
+    const productId = req.params.id;
     const { title, description, price, quantity, category } = req.body;
 
-    // Check if product exists
+    const file = req.file;
+    let filePath = undefined;
+    if (!file) {
+      return res.status(400).json({
+        success: false,
+        error: "No file uploaded",
+      });
+    }
+
     const existingProduct = await prisma.product.findUnique({
       where: { id: productId },
     });
@@ -127,14 +142,21 @@ const updateProduct = async (req, res) => {
         error: "Product not found",
       });
     }
+    if (file) {
+      filePath = fileUpload(file,"products");
+      if (existingProduct.image) {
+        deleteFile(existingProduct.image);
+      }
+    }
 
-    //update data
+    // Update data
     const updateData = {
       title: title,
       description: description,
       category: category,
       price: price !== undefined ? parseFloat(price) : undefined,
       quantity: quantity !== undefined ? parseInt(quantity) : undefined,
+      image: filePath,
     };
 
     const product = await prisma.product.update({
@@ -159,21 +181,26 @@ const updateProduct = async (req, res) => {
     });
   } catch (error) {
     console.error("Update product error:", error);
-    if (error.code === "P2025") {
+    res.status(500).json({ success: false, error: "Internal server error" });
+  }
+};
+// Delete Product
+const deleteProduct = async (req: Request, res: Response) => {
+  try {
+    const productId = req.params.id;
+    const existingProduct = await prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    if (!existingProduct) {
       return res.status(404).json({
         success: false,
         error: "Product not found",
       });
     }
-    res.status(500).json({ success: false, error: "Internal server error" });
-  }
-};
-
-// Delete Product
-const deleteProduct = async (req, res) => {
-  try {
-    const productId = parseInt(req.params.id);
-
+    if (existingProduct.image) {
+      deleteFile(existingProduct.image);
+    }
     await prisma.product.delete({
       where: { id: productId },
     });

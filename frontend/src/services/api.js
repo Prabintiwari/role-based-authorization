@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL;
+export const API_URL = import.meta.env.VITE_API_URL|| 'http://localhost:3000';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -18,6 +18,11 @@ api.interceptors.request.use((config) => {
 export const signup = (data) => api.post('/users/signup', data);
 export const login = (data) => api.post('/users/login', data);
 export const getCurrentUser = () => api.get('/users/my-profile');
+
+// reset password
+export const forgotPassword = (data)=>api.post('/users/forgot-password',data)
+export const verifyOtp = (data)=>api.post('/users/verify-otp',data)
+export const resetPassword = (data)=>api.post('/users/reset-password',data)
 
 // Products
 export const getProducts = () => api.get('/products');

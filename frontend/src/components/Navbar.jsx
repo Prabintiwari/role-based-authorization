@@ -1,12 +1,17 @@
 import { Link, NavLink } from "react-router-dom";
 import { useState } from "react";
 import { ShoppingCart } from "lucide-react";
-import getRoleBadgeColor from "./Common"
- 
+import getRoleBadgeColor from "./Common";
+import { API_URL } from "../services/api";
+
 function Navbar({ user, logout, cartItemCount = 0 }) {
   const [open, setOpen] = useState(false);
 
   if (!user) return null;
+  const getImageUrl = (imagePath) => {
+      if (!imagePath) return null;
+      return `${API_URL}/${imagePath}`;
+    };
 
   return (
     <nav className="bg-gray-800 text-white shadow-md">
@@ -98,6 +103,17 @@ function Navbar({ user, logout, cartItemCount = 0 }) {
           >
             Logout
           </button>
+          <div className="relative">
+            <button className="flex items-center space-x-2 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+              <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full overflow-hidden border-2 border-gray-200 dark:border-gray-700">
+                <img
+                  src={getImageUrl(user.image)}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -124,6 +140,17 @@ function Navbar({ user, logout, cartItemCount = 0 }) {
           >
             Logout
           </button>
+          <div className="relative">
+            <button className="flex items-center space-x-2 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+              <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full overflow-hidden border-2 border-gray-200 dark:border-gray-700">
+                <img
+                  src={user?.image}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </button>
+          </div>
         </div>
       </div>
     </nav>
