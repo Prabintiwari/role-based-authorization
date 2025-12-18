@@ -6,6 +6,7 @@ import productRoutes from "./routes/productRoutes";
 import cartRoutes from "./routes/cartRoutes";
 import fileUploadRoute from "./routes/fileUploadsRoutes";
 import responseHandler from "./middleware/responseHandler";
+import "./workers/emailWorkers";
 
 dotenv.config();
 

@@ -1,5 +1,5 @@
 const welcomeEmail = (name: string) => {
-  `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">

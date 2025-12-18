@@ -4,7 +4,7 @@ import { generateToken } from "../middleware/auth";
 import Password_Reset_OTP from "../templetes/forgot_password_otp";
 import registration_otp_template from "../templetes/registration_otp";
 import welcomeEmail from "../templetes/WelcomeEmail";
-import transporter from "../utils/emailServices";
+import {queueEmail, transporter} from "../utils/emailServices";
 import generateOTP from "../utils/generate_opt";
 import prisma from "../utils/Prisma";
 
@@ -50,13 +50,7 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
       message: `otp sends successfully to ${email}`,
       
     });
-    await transporter.sendMail({
-      from: `"Role-based-authorization Team" <${process.env.SMTP_USER}>`,
-      to: `${email}`,
-      subject: "Your registration OTP!",
-      text: "Here is your registration OTP!",
-      html: registration_otp_template(otp, name),
-    });
+    await queueEmail(email, otp, name);
   } catch (error) {
     console.error(error);
     next({ status: 500, success: false, message: "internal server error" });
